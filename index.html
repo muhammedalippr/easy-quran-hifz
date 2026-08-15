@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Quran Memorization - Surah Selection</title>
+    <meta name="description" content="Select Surah or Special Verse for Memorization">
+    <meta name="theme-color" content="#050505">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <!-- Offline Hafs Data -->
+    <script src="hafsData.js"></script>
+    <script src="admobHelper.js"></script>
+
+    <style>
+        @font-face {
+            font-family: 'UthmanicHafs';
+            src: url('uthmanic_hafs_v20.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-color: #050505;
+            --surface-color: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-color: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --header-bg: rgba(5, 5, 5, 0.85);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --num-bg: rgba(255, 255, 255, 0.05);
+            --card-arabic: rgba(255, 255, 255, 0.85);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-color: #f8fafc;
+                --surface-color: #ffffff;
+                --surface-hover: #f1f5f9;
+                --border-color: #e2e8f0;
+                --primary-color: #059669;
+                --primary-glow: rgba(5, 150, 105, 0.25);
+                --text-main: #0f172a;
+                --text-muted: #64748b;
+                --header-bg: rgba(248, 250, 252, 0.9);
+                --input-bg: #f1f5f9;
+                --num-bg: #e6f7f0;
+                --card-arabic: #1e293b;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 0% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        input, textarea {
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+
+        /* Top Header */
+        .header {
+            position: sticky;
+            top: 0;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 2rem);
+            padding-bottom: 1.2rem;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
+
+        .brand-title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .brand-title h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .brand-title p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        /* Search Box */
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.8rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        /* Tabs Section */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(5, 5, 5, 0.4);
+        }
+
+        .tab-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary-color);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        /* Main Container */
+        .content {
+            flex: 1;
+            padding: 1.5rem 1.5rem calc(env(safe-area-inset-bottom, 0px) + 3rem) 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Recent Section */
+        .recent-section {
+            margin-bottom: 1.2rem;
+            display: none;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .recent-section::-webkit-scrollbar {
+            display: none;
+        }
+
+        .recent-scroll-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: max-content;
+            padding-bottom: 2px;
+        }
+
+        .recent-label-pill {
+            flex: 0 0 auto;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 0.35rem 0.6rem 0.35rem 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .recent-card {
+            flex: 0 0 auto;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.28rem 0.55rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .recent-card:hover, .recent-card:active {
+            background: var(--surface-hover);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .recent-left {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .recent-num {
+            width: 20px;
+            height: 20px;
+            background: var(--num-bg);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.68rem;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .recent-card:hover .recent-num, .recent-card:active .recent-num {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .recent-info h4 {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+
+        .recent-arabic {
+            font-family: 'UthmanicHafs', 'Amiri', serif;
+            font-size: 0.88rem;
+            color: var(--card-arabic);
+            line-height: 1;
+        }
+
+        /* Grid Layout */
+        .surah-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Surah Card */
+        .surah-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .surah-card:hover {
+            background: var(--surface-hover);
+            border-color: rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .surah-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .surah-num {
+            width: 42px;
+            height: 42px;
+            background: var(--num-bg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .surah-card:hover .surah-num {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .surah-details h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .surah-details p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .surah-arabic {
+            font-family: 'UthmanicHafs', 'Amiri', serif;
+            font-size: 1.4rem;
+            color: var(--card-arabic);
+            direction: rtl;
+        }
+
+        /* Special Items Grid */
+        .special-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .special-card {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .special-card:hover {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+        }
+
+        .special-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.4rem;
+        }
+
+        .special-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        @media (max-width: 600px) {
+            .header {
+                padding-top: calc(env(safe-area-inset-top, 0px) + 1.8rem);
+                padding-bottom: 1rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .content { padding: 1rem 1rem calc(env(safe-area-inset-bottom, 0px) + 2.5rem) 1rem; }
+            .surah-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <div class="brand">
+                <div class="brand-title">
+                    <h1>Easy Quran Hifz</h1>
+                    <p>Smart Memorization tool</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <span class="material-symbols-rounded search-icon">search</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Search Surah by name or number..." autocomplete="off">
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Recent Section -->
+        <div class="recent-section" id="recent-section">
+            <div class="recent-scroll-container" id="recent-container">
+                <!-- Recent Label & Cards Injected Here -->
+            </div>
+        </div>
+
+        <div class="surah-grid" id="surah-grid">
+            <!-- Surah Cards Injected Here -->
+        </div>
+    </div>
+
+    <script>
+        let surahList = [];
+
+        // Extract unique Surah list from hafsData
+        function parseSurahs() {
+            if (!window.hafsData) return;
+
+            const map = new Map();
+            window.hafsData.forEach(aya => {
+                if (!map.has(aya.sura_no)) {
+                    map.set(aya.sura_no, {
+                        number: aya.sura_no,
+                        nameEn: aya.sura_name_en,
+                        nameAr: aya.sura_name_ar,
+                        totalAyahs: 1,
+                        juz: aya.jozz
+                    });
+                } else {
+                    map.get(aya.sura_no).totalAyahs++;
+                }
+            });
+
+            surahList = Array.from(map.values());
+            renderRecents();
+            renderSurahs();
+        }
+
+        // Helper to normalize string by stripping diacritics/special characters
+        function normalizeText(str) {
+            if (!str) return '';
+            return str
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // remove diacritics (e.g. ā -> a, ḥ -> h)
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, ''); // strip hyphens, spaces, apostrophes
+        }
+
+        function renderRecents() {
+            const recentSection = document.getElementById('recent-section');
+            const recentContainer = document.getElementById('recent-container');
+            const searchVal = document.getElementById('search-input').value.trim();
+
+            if (searchVal) {
+                recentSection.style.display = 'none';
+                return;
+            }
+
+            let recentIds = [];
+            try {
+                recentIds = JSON.parse(localStorage.getItem('recentSurahIds')) || [];
+            } catch (e) {
+                recentIds = [];
+            }
+
+            if (!Array.isArray(recentIds) || recentIds.length === 0) {
+                recentSection.style.display = 'none';
+                return;
+            }
+
+            recentContainer.innerHTML = '';
+            
+            const labelPill = document.createElement('div');
+            labelPill.className = 'recent-label-pill';
+            labelPill.innerHTML = `RECENT`;
+            recentContainer.appendChild(labelPill);
+
+            let validCount = 0;
+
+            recentIds.forEach(num => {
+                const surah = surahList.find(s => s.number === num);
+                if (surah) {
+                    validCount++;
+                    const card = document.createElement('div');
+                    card.className = 'recent-card';
+                    card.onclick = () => openSurah(surah.number);
+                    card.innerHTML = `
+                        <div class="recent-left">
+                            <div class="recent-num">${surah.number}</div>
+                            <div class="recent-info">
+                                <h4>${surah.nameEn}</h4>
+                            </div>
+                        </div>
+                        <div class="recent-arabic">${surah.nameAr}</div>
+                    `;
+                    recentContainer.appendChild(card);
+                }
+            });
+
+            if (validCount > 0) {
+                recentSection.style.display = 'block';
+            } else {
+                recentSection.style.display = 'none';
+            }
+        }
+
+        function renderSurahs() {
+            const grid = document.getElementById('surah-grid');
+            const rawSearch = document.getElementById('search-input').value;
+            const searchVal = normalizeText(rawSearch);
+            const rawSearchLower = rawSearch.toLowerCase().trim();
+            grid.innerHTML = '';
+
+            let filtered = surahList.filter(surah => {
+                if (rawSearchLower) {
+                    const normalizedName = normalizeText(surah.nameEn);
+                    const matchNameEn = normalizedName.includes(searchVal);
+                    const matchNameAr = surah.nameAr.includes(rawSearchLower);
+                    const matchNum = surah.number.toString() === rawSearchLower;
+                    return matchNameEn || matchNameAr || matchNum;
+                }
+                return true;
+            });
+
+            filtered.forEach(surah => {
+                const card = document.createElement('div');
+                card.className = 'surah-card';
+                card.onclick = () => openSurah(surah.number);
+
+                card.innerHTML = `
+                    <div class="surah-left">
+                        <div class="surah-num">${surah.number}</div>
+                        <div class="surah-details">
+                            <h3>${surah.nameEn}</h3>
+                            <p>${surah.totalAyahs} Verses • Juz ${surah.juz}</p>
+                        </div>
+                    </div>
+                    <div class="surah-arabic">${surah.nameAr}</div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function openSurah(surahNumber) {
+            // Save to recentSurahIds
+            let recentIds = [];
+            try {
+                recentIds = JSON.parse(localStorage.getItem('recentSurahIds')) || [];
+            } catch (e) {
+                recentIds = [];
+            }
+            recentIds = recentIds.filter(id => id !== surahNumber);
+            recentIds.unshift(surahNumber);
+            if (recentIds.length > 10) recentIds = recentIds.slice(0, 10);
+            localStorage.setItem('recentSurahIds', JSON.stringify(recentIds));
+
+            localStorage.setItem('selectedSurahNo', surahNumber);
+            window.name = surahNumber;
+            window.location.href = `memorize_v2.html?Surah_no=${surahNumber}`;
+        }
+
+        document.getElementById('search-input').addEventListener('input', () => {
+            renderRecents();
+            renderSurahs();
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // Capacitor Native Back Button listener to exit app when on index.html
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.addListener('backButton', () => {
+                window.Capacitor.Plugins.App.exitApp();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            parseSurahs();
+        });
+    </script>
+</body>
+</html>

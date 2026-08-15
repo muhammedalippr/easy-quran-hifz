@@ -1,0 +1,25 @@
+{
+  "name": "easy-quran-hifz---easy-memorization-tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hafsData.js",
+  "scripts": {
+    "build": "powershell -ExecutionPolicy Bypass -Command \"if (!(Test-Path www)) { New-Item -ItemType Directory -Path www }; Copy-Item *.html, *.js, *.ttf www/ -Recurse -Force\"",
+    "cap:copy": "npm run build && npx cap copy android",
+    "cap:sync": "npm run build && npx cap sync android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor-community/admob": "^8.1.0",
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
+  }
+}

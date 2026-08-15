@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Quran Memorization</title>
+    <meta name="description" content="Quran Memorization Web App">
+    <meta name="theme-color" content="#050505">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <!-- Offline Hafs Data -->
+    <script src="hafsData.js"></script>
+
+    <style>
+        @font-face {
+            font-family: 'UthmanicHafs';
+            src: url('uthmanic_hafs_v20.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'AnekMalayalam';
+            src: url('AnekMalayalam-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-color: #050505;
+            --surface-color: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --primary-color: #10b981; /* Emerald Green for memorization focus */
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --ayah-font-size: 2.05rem;
+            --bar-bg: rgba(5, 5, 5, 0.85);
+            --menu-bg: rgba(18, 18, 20, 0.97);
+            --ayah-inactive: rgba(255, 255, 255, 0.7);
+            --ayah-active-color: #10b981;
+            --ayah-recap-color: #d4af37;
+            --ctrl-btn-bg: rgba(255, 255, 255, 0.06);
+            --ctrl-btn-border: rgba(255, 255, 255, 0.12);
+            --ctrl-btn-color: #ffffff;
+            --memo-shadow: none;
+            --active-ayah-bg: rgba(16, 185, 129, 0.05);
+            --active-recap-bg: rgba(212, 175, 55, 0.07);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-color: #f8fafc;
+                --surface-color: #ffffff;
+                --surface-hover: #f1f5f9;
+                --border-color: #e2e8f0;
+                --primary-color: #059669;
+                --primary-glow: rgba(5, 150, 105, 0.25);
+                --text-main: #0f172a;
+                --text-muted: #64748b;
+                --bar-bg: rgba(248, 250, 252, 0.94);
+                --menu-bg: rgba(255, 255, 255, 0.98);
+                --ayah-inactive: #1e293b;
+                --ayah-active-color: #047857;
+                --ayah-recap-color: #b45309;
+                --ctrl-btn-bg: #ffffff;
+                --ctrl-btn-border: #cbd5e1;
+                --ctrl-btn-color: #0f172a;
+                --memo-shadow: none;
+                --active-ayah-bg: #ecfdf5;
+                --active-recap-bg: #fffbeb;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 0% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+            padding-bottom: 16px;
+            padding-left: 24px;
+            padding-right: 24px;
+            background: var(--bar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .surah-header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .surah-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+        }
+
+        .surah-info h1 {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: center;
+            display: block;
+            line-height: 1.2;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .back-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .surah-info p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        /* Memorization Status Box */
+        .memo-status {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: none;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.2rem;
+        }
+
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .status-value.highlight {
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .mode-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .mode-badge.learn {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary-color);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .mode-badge.recap {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--ayah-recap-color);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* Main Content */
+        .quran-reader {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 15% 150px;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        .bismillah {
+            font-family: 'UthmanicHafs', 'Amiri', serif;
+            font-size: 1.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0.5rem;
+            margin-bottom: 1.2rem;
+            opacity: 0.85;
+        }
+
+        .ayah {
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .ayah:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Active Ayah Styling */
+        .ayah.active {
+            background: var(--active-ayah-bg);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1), inset 0 0 20px rgba(16, 185, 129, 0.05);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .ayah.active.recap {
+            background: var(--active-recap-bg);
+            border-color: var(--ayah-recap-color);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(212, 175, 55, 0.06);
+        }
+
+        .ayah-text {
+            font-family: 'UthmanicHafs', 'Amiri', serif;
+            font-size: var(--ayah-font-size, 2.05rem);
+            line-height: 1.8;
+            direction: rtl;
+            text-align: right;
+            color: var(--ayah-inactive);
+            transition: color 0.3s ease;
+        }
+
+        .ayah.active .ayah-text {
+            color: var(--ayah-active-color);
+            text-shadow: 0 0 1px rgba(16, 185, 129, 0.3);
+        }
+
+        .ayah.active.recap .ayah-text {
+            color: var(--ayah-recap-color);
+            text-shadow: 0 0 1px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .ayah.active .progress-container {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            box-shadow: 0 0 10px var(--primary-color);
+            transition: width 0.1s linear;
+        }
+
+        .ayah.active.recap .progress-bar {
+            background: #d4af37;
+            box-shadow: 0 0 10px #d4af37;
+        }
+
+        /* Bottom Player */
+        .player-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding-top: 10px;
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+            padding-left: 16px;
+            padding-right: 16px;
+            background: var(--bar-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .player-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .control-btn:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+
+        .play-pause-btn {
+            background: var(--primary-color);
+            color: #000;
+            width: 56px;
+            height: 56px;
+            border: none;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .play-pause-btn:hover {
+            background: #34d399;
+            box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5);
+            color: #000;
+        }
+
+        .play-pause-btn.buffering {
+            animation: pulseGlow 1.2s ease-in-out infinite;
+        }
+
+        .play-pause-btn.buffering svg {
+            animation: rotateBuffering 1s linear infinite;
+        }
+
+        @keyframes rotateBuffering {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.95); opacity: 0.85; }
+        }
+
+        .control-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .play-pause-btn svg {
+            width: 28px;
+            height: 28px;
+            transition: transform 0.2s ease;
+        }
+
+        /* Custom Repeat Control */
+        .repeat-control-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-repeat-btn {
+            background: var(--ctrl-btn-bg);
+            border: 1px solid var(--ctrl-btn-border);
+            color: var(--ctrl-btn-color);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 0.55rem 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .custom-repeat-btn:hover, .custom-repeat-btn:active {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: var(--primary-color);
+        }
+
+        .custom-repeat-btn svg {
+            width: 17px;
+            height: 17px;
+            fill: currentColor;
+        }
+
+        .repeat-menu {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: 0;
+            transform: translateY(8px) scale(0.95);
+            background: var(--menu-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 18px;
+            padding: 6px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            width: 215px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .repeat-menu.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .repeat-menu-item {
+            background: var(--surface-color);
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.6rem 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .repeat-menu-item:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .repeat-menu-item.active {
+            background: var(--primary-color);
+            color: #fff;
+            font-weight: 800;
+            box-shadow: 0 2px 8px var(--primary-glow);
+        }
+
+        /* Custom Reciter Control */
+        .reciter-control-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-reciter-btn {
+            background: var(--ctrl-btn-bg);
+            border: 1px solid var(--ctrl-btn-border);
+            color: var(--ctrl-btn-color);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.55rem 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 170px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .custom-reciter-btn:hover, .custom-reciter-btn:active {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: var(--primary-color);
+        }
+
+        .custom-reciter-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .reciter-name-display {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+
+        .reciter-menu {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: 0;
+            transform: translateY(8px) scale(0.95);
+            background: rgba(18, 18, 20, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 18px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: 240px;
+            max-height: 280px;
+            overflow-y: auto;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .reciter-menu::-webkit-scrollbar { width: 4px; }
+        .reciter-menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+
+        .reciter-menu.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .reciter-menu-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            color: #cbd5e1;
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 500;
+            padding: 0.55rem 0.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .reciter-menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .reciter-menu-item.active {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            font-weight: 600;
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .quran-reader { padding: 1rem 1rem 150px; }
+        }
+
+        @media (max-width: 600px) {
+            .top-bar { flex-direction: column; gap: 1rem; padding: calc(env(safe-area-inset-top, 0px) + 20px) 24px 16px 24px; align-items: flex-start; }
+            .memo-status { width: 100%; justify-content: space-between; }
+            .ayah-text { font-size: calc(var(--ayah-font-size) * 0.8); }
+        }
+
+        /* Finished Overlay */
+        #finished-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 10000; opacity: 0; transition: opacity 0.4s ease;
+        }
+        #finished-overlay.active { display: flex; opacity: 1; }
+        .finished-content {
+            background: var(--surface-color); border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 3rem 2rem; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.05);
+            max-width: 90%; width: 400px;
+        }
+        .finished-content h2 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        .finished-content p { color: var(--text-muted); margin-bottom: 2rem; font-size: 1.1rem; }
+        .finished-buttons { display: flex; gap: 1rem; justify-content: center; }
+        .finished-buttons button {
+            padding: 0.8rem 1.5rem; border: none; border-radius: 30px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; flex: 1;
+        }
+        .btn-restart { background: var(--primary-color); color: #000; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-restart:hover { background: #34d399; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5); }
+        .btn-close { background: transparent; color: var(--text-main); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-close:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        /* Welcome Overlay */
+        .welcome-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 10001; opacity: 0; transition: opacity 0.4s ease;
+        }
+        .welcome-overlay.active { display: flex; opacity: 1; }
+        .welcome-content {
+            background: var(--bg-color); border: 1px solid var(--border-color);
+            padding: 1.2rem; border-radius: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.05);
+            max-width: 90%; width: 550px; overflow-y: hidden;
+        }
+        .welcome-content::-webkit-scrollbar { display: none; }
+        .welcome-header { display: flex; justify-content: center; margin-bottom: 0.8rem; }
+        .lang-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 30px; padding: 5px; }
+        .lang-btn {
+            background: transparent; border: none; color: var(--text-muted); padding: 0.4rem 1.2rem;
+            border-radius: 25px; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.3s;
+        }
+        .lang-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        .welcome-text { display: none; text-align: center; line-height: 1.4; color: rgba(255, 255, 255, 0.85); font-size: 0.85rem; }
+        .welcome-text.active { display: block; animation: fadeIn 0.4s; }
+        .welcome-text h2 { text-align: center; color: var(--primary-color); margin-bottom: 0.6rem; font-size: 1.3rem; }
+        .welcome-text p { margin-bottom: 0.5rem; }
+        
+        .welcome-footer { margin-top: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+        
+        /* Custom Checkbox */
+        .checkbox-container {
+            display: flex; align-items: center; cursor: pointer; position: relative; user-select: none;
+        }
+        .checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        .checkmark {
+            height: 20px; width: 20px; background-color: rgba(255,255,255,0.1); border: 1px solid var(--border-color);
+            border-radius: 6px; margin-right: 12px; display: flex; justify-content: center; align-items: center; transition: all 0.2s;
+        }
+        .checkbox-container:hover input ~ .checkmark { background-color: rgba(255,255,255,0.15); }
+        .checkbox-container input:checked ~ .checkmark { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .checkmark:after {
+            content: ""; display: none; width: 5px; height: 10px; border: solid #000; border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+        .checkbox-container input:checked ~ .checkmark:after { display: block; }
+        .checkbox-label { color: var(--text-muted); font-size: 0.95rem; }
+        
+        .btn-primary {
+            background: var(--primary-color); color: #000; padding: 0.8rem 3rem; border: none; border-radius: 30px;
+            font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            font-family: inherit;
+        }
+        .btn-primary:hover { background: #34d399; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Parts Overlay */
+        .parts-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: none; justify-content: center; align-items: center; z-index: 10002; opacity: 0; transition: opacity 0.3s ease;
+            padding: 1.5rem;
+        }
+        .parts-overlay.active { display: flex; opacity: 1; }
+        .parts-content {
+            background: rgba(18, 18, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.5rem 1.25rem; border-radius: 24px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 420px; width: 100%; max-height: 82vh; display: flex; flex-direction: column; text-align: center;
+        }
+        .parts-header-title {
+            font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.2rem;
+            letter-spacing: -0.2px;
+        }
+        .parts-subtitle {
+            font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1.2rem;
+        }
+        .parts-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.65rem;
+            overflow-y: auto;
+            padding: 2px 2px 6px;
+        }
+        .parts-container::-webkit-scrollbar { width: 4px; }
+        .parts-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        .btn-part {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            color: var(--text-main);
+            padding: 0.75rem 0.6rem;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-part-num {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+        .btn-part-range {
+            font-size: 0.72rem;
+            color: #10b981;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .btn-part:hover, .btn-part:active {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-part.custom-part-trigger {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        .custom-range-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 16px;
+            padding: 0.85rem;
+            margin-bottom: 0.9rem;
+            text-align: left;
+        }
+        .custom-inputs-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.4rem;
+        }
+        .custom-input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .custom-input-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .custom-range-picker-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .custom-range-btn {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 0.55rem 0.7rem;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-range-btn:hover, .custom-range-btn:active {
+            border-color: var(--primary-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .custom-range-btn svg {
+            width: 13px;
+            height: 13px;
+            fill: #10b981;
+            flex-shrink: 0;
+        }
+        .custom-range-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 20, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 14px;
+            padding: 6px;
+            max-height: 190px;
+            overflow-y: auto;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200;
+        }
+        .custom-range-menu::-webkit-scrollbar { width: 4px; }
+        .custom-range-menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        .custom-range-menu.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .custom-range-item {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #cbd5e1;
+            font-size: 0.84rem;
+            font-weight: 500;
+            padding: 0.5rem 0.7rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-range-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .custom-range-item.active {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            font-weight: 700;
+        }
+        .btn-custom-start {
+            background: var(--primary-color);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            margin-top: 0.6rem;
+            width: 100%;
+        }
+        .btn-custom-start:active {
+            transform: scale(0.98);
+        }
+        .parts-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .parts-divider::before, .parts-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;">Preparing Memorization...</p>
+    </div>
+
+    <div id="finished-overlay">
+        <div class="finished-content">
+            <h2>Finished!</h2>
+            <p>You have completed the memorization sequence.</p>
+            <div class="finished-buttons">
+                <button class="btn-restart" onclick="window.location.reload()">Restart</button>
+                <button class="btn-close" onclick="handleClose()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parts Selection Overlay -->
+    <div id="parts-overlay" class="parts-overlay">
+        <div class="parts-content">
+            <div class="parts-header-title">Select Memorization Part</div>
+            <div class="parts-subtitle">Select starting and ending verses</div>
+            
+            <div id="custom-range-card" class="custom-range-card">
+                <div style="font-size: 0.82rem; font-weight: 600; color: #fff;">Custom Verse Range</div>
+                <div class="custom-inputs-row">
+                    <div class="custom-input-group">
+                        <span class="custom-input-label">From Verse</span>
+                        <div class="custom-range-picker-wrapper" id="custom-from-wrapper">
+                            <button type="button" class="custom-range-btn" id="btn-custom-from">
+                                <span id="custom-from-text">Verse 1</span>
+                                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </button>
+                            <div class="custom-range-menu" id="custom-from-menu"></div>
+                        </div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 1.1rem; padding-top: 0.8rem;">–</div>
+                    <div class="custom-input-group">
+                        <span class="custom-input-label">To Verse</span>
+                        <div class="custom-range-picker-wrapper" id="custom-to-wrapper">
+                            <button type="button" class="custom-range-btn" id="btn-custom-to">
+                                <span id="custom-to-text">Verse 10</span>
+                                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </button>
+                            <div class="custom-range-menu" id="custom-to-menu"></div>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-custom-start" class="btn-custom-start">Start Custom Range</button>
+            </div>
+
+            <div class="parts-divider">Or Select Preset Part</div>
+
+            <div id="parts-container" class="parts-container">
+                <!-- Parts injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Instructions Overlay -->
+    <div id="welcome-overlay" class="welcome-overlay">
+        <div class="welcome-content">
+            <div class="welcome-header">
+                <div class="lang-toggle">
+                    <button id="btn-lang-en" class="lang-btn active">English</button>
+                    <button id="btn-lang-ml" class="lang-btn">മലയാളം</button>
+                </div>
+            </div>
+            
+            <div id="welcome-text-en" class="welcome-text active">
+                <h2>Learn Hifz Easily</h2>
+                <p>This tool is designed to make Quran memorization easy. Each Ayah is recited three times, followed by a recap from the beginning.</p>
+                <p>During the three repetitions, recite along carefully, paying attention to the rules of Tajweed such as elongation (Madd) and nasalization (Ghunnah). Afterward, when recapping from the beginning, try to connect the Ayahs together.</p>
+                <p>This method helps you memorize much faster and with less difficulty compared to learning alone.</p>
+                <p>Listen, watch, and recite aloud attentively. This approach often shows excellent results, especially with children.</p>
+            </div>
+
+            <div id="welcome-text-ml" class="welcome-text" style="font-family: 'AnekMalayalam', sans-serif;">
+                <h2>എളുപ്പം ഹിഫ്ള് പഠിക്കാം</h2>
+                <p>ഖുർആൻ മനപ്പാഠമാക്കുന്നത് എളുപ്പമാക്കാൻ തയ്യാറാക്കിയ ടൂളാണിത്, ഓരോ ആയത്തുകൾ മൂന്നുപ്രാവശ്യം ആവർത്തിച്ചു ഓതുകയും വീണ്ടും ആദ്യം മുതൽ ഓതുകയും ചെയ്യുന്നു.</p>
+                <p>മൂന്ന് തവണ ഓതുമ്പോൾ നീട്ടലുകളും മണിക്കലുളും (مد ، غنة) തുടങ്ങിയ നിയമങ്ങൾ ശ്രദ്ധിച്ച് കൂടെ പാരായണം ചെയ്യുക, അതിനുശേഷം തുടക്കം മുതൽ ആവർത്തിക്കുമ്പോൾ ആയത്തുകൾ പരസ്പരം ബന്ധപ്പെടുത്തി പഠിക്കാൻ ശ്രമിക്കുക.</p>
+                <p>സാധാരണഗതിയിൽ ഒറ്റക്ക് പഠിക്കുന്നതിനേക്കാൾ കൂടുതൽ വേഗത്തിൽ പ്രയാസമില്ലാതെ പഠിച്ചെടുക്കാൻ സാധിക്കും.</p>
+                <p>ശ്രദ്ധയോടെ കണ്ടും കേട്ടും ഒരുമിച്ച് ഉച്ചത്തിൽ പാരായണം ചെയ്യുക, കുട്ടികളിൽ ഈ രീതി നല്ല റിസൾട്ട് കാണാറുണ്ട്.</p>
+            </div>
+
+            <div class="welcome-footer">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="dont-show-again">
+                    <span class="checkmark"></span>
+                    <span class="checkbox-label" id="welcome-cb-label">Don't show again</span>
+                </label>
+                <button id="btn-welcome-ok" class="btn-primary">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="surah-header-container">
+            <div class="surah-info">
+                <h1 id="surah-name">Loading Surah...</h1>
+            </div>
+        </div>
+        
+        <div class="memo-status">
+            <div id="mode-badge" class="mode-badge learn">Ready</div>
+            <div class="status-item">
+                <span class="status-label">Verse</span>
+                <span class="status-value highlight" id="status-verse">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Repetition</span>
+                <span class="status-value" id="status-repetition">- / -</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="quran-reader" id="quran-reader">
+        <!-- Ayahs injected here -->
+    </div>
+
+    <div class="player-bar">
+        <div class="player-controls-row">
+            <button class="control-btn play-pause-btn" id="btn-play-pause" title="Play/Pause">
+                <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5V19L19 12L8 5Z" /></svg>
+                <svg id="icon-pause" viewBox="0 0 24 24" style="display: none;"><path d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z" /></svg>
+            </button>
+
+            <div class="reciter-control-wrapper" id="reciter-control-wrapper">
+                <button type="button" class="custom-reciter-btn" id="btn-custom-reciter" title="Select Reciter">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                    <span class="reciter-name-display" id="reciter-display-name">Reciter</span>
+                    <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; opacity: 0.7; margin-left: auto;">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </button>
+                <div class="reciter-menu" id="reciter-menu">
+                    <div class="reciter-menu-item" data-val="Abu_Bakr_Ash-Shaatree_128kbps">Abu Bakr Ash-Shaatree</div>
+                    <div class="reciter-menu-item" data-val="Alafasy_128kbps">Mishary Alafasy</div>
+                    <div class="reciter-menu-item" data-val="Abdurrahmaan_As-Sudais_192kbps">Abdurrahmaan As-Sudais</div>
+                    <div class="reciter-menu-item" data-val="Abdul_Basit_Mujawwad_128kbps">Abdul Basit (Mujawwad)</div>
+                    <div class="reciter-menu-item" data-val="Yasser_Ad-Dussary_128kbps">Yasser Al-Dawsari</div>
+                    <div class="reciter-menu-item" data-val="Maher_AlMuaiqly_64kbps">Maher Al Muaiqly</div>
+                    <div class="reciter-menu-item" data-val="ahmed_ibn_ali_al_ajamy_128kbps">Ahmed Al-Ajamy</div>
+                    <div class="reciter-menu-item" data-val="Saood_ash-Shuraym_128kbps">Saud Al-Shuraim</div>
+                    <div class="reciter-menu-item" data-val="Husary_128kbps">Mahmoud Khalil Al-Husary</div>
+                    <div class="reciter-menu-item" data-val="Salaah_AbdulRahman_Bukhatir_128kbps">Salah Bukhatir</div>
+                </div>
+            </div>
+
+            <div class="repeat-control-wrapper" id="repeat-control-wrapper">
+                <button type="button" class="custom-repeat-btn" id="btn-custom-repeat" title="Repeat Count">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                    </svg>
+                    <span id="repeat-display-value">3x</span>
+                </button>
+                <div class="repeat-menu" id="repeat-menu">
+                    <div class="repeat-menu-item" data-val="1">1x</div>
+                    <div class="repeat-menu-item" data-val="2">2x</div>
+                    <div class="repeat-menu-item active" data-val="3">3x</div>
+                    <div class="repeat-menu-item" data-val="4">4x</div>
+                    <div class="repeat-menu-item" data-val="5">5x</div>
+                    <div class="repeat-menu-item" data-val="6">6x</div>
+                    <div class="repeat-menu-item" data-val="7">7x</div>
+                    <div class="repeat-menu-item" data-val="8">8x</div>
+                    <div class="repeat-menu-item" data-val="9">9x</div>
+                    <div class="repeat-menu-item" data-val="999" style="font-size: 1.1rem; line-height: 1;">∞</div >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+
+    <script>
+        // Data & State
+        let surahData = null;
+        let currentAyahs = [];
+        let playlist = [];
+        let currentPlaylistIndex = 0;
+        let isPlaying = false;
+        let currentReciter = localStorage.getItem('hifzSelectedReciter') || 'Abu_Bakr_Ash-Shaatree_128kbps';
+        let globalRepetitionCount = parseInt(localStorage.getItem('selectedRepeatCount'), 10) || 3;
+        let currentStartIdx = 0;
+        let currentEndIdx = 0;
+        
+        // DOM Elements
+        const loader = document.getElementById('loader');
+        const quranReader = document.getElementById('quran-reader');
+        const surahNameEl = document.getElementById('surah-name');
+        const surahDetailsEl = document.getElementById('surah-details');
+        const modeBadge = document.getElementById('mode-badge');
+        const statusVerse = document.getElementById('status-verse');
+        const statusRepetition = document.getElementById('status-repetition');
+        
+        const audioEl = document.getElementById('audio-player');
+        const btnPlayPause = document.getElementById('btn-play-pause');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const btnCustomRepeat = document.getElementById('btn-custom-repeat');
+        const repeatDisplayValue = document.getElementById('repeat-display-value');
+        const repeatMenu = document.getElementById('repeat-menu');
+        const btnCustomReciter = document.getElementById('btn-custom-reciter');
+        const reciterDisplayName = document.getElementById('reciter-display-name');
+        const reciterMenu = document.getElementById('reciter-menu');
+
+        window.KodularAPI = {
+            pauseAudio: function() {
+                if (audioEl) {
+                    audioEl.pause();
+                    isPlaying = false;
+                    updateUI();
+                }
+            }
+        };
+
+        function handleClose() {
+            if (audioEl) {
+                audioEl.pause();
+                isPlaying = false;
+            }
+            // Navigate back to Surah selection screen without polluting history stack
+            window.location.replace("index.html");
+        }
+
+        // Initialize App
+        function init() {
+            updateReciterUI(currentReciter);
+            updateRepeatUI(globalRepetitionCount);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            let surahParam = urlParams.get('Surah_no') || window.name || localStorage.getItem('selectedSurahNo');
+            
+            if (window.hafsData) {
+                if (surahParam === "Memorize_Ayatul_Kursiy" || surahParam === "Memorize_Amanarrasool" || surahParam === "Memorize_Lau_Anzalna") {
+                    loadSpecialData(surahParam);
+                } else {
+                    let surahNum = parseInt(surahParam, 10);
+                    if (!surahNum || isNaN(surahNum) || surahNum < 1 || surahNum > 114) {
+                        surahNum = 1; 
+                    }
+                    loadSurahData(surahNum);
+                }
+            } else {
+                alert("Quran data (hafsData.js) not found!");
+            }
+        }
+
+        function loadSpecialData(specialName) {
+            globalRepetitionCount = 10;
+            updateRepeatUI(10);
+            let versesConfig = [];
+            
+            if (specialName === "Memorize_Ayatul_Kursiy") versesConfig = [{ sura: 2, aya: 255 }];
+            else if (specialName === "Memorize_Amanarrasool") versesConfig = [{ sura: 2, aya: 285 }, { sura: 2, aya: 286 }];
+            else if (specialName === "Memorize_Lau_Anzalna") versesConfig = [{ sura: 59, aya: 21 }];
+            
+            currentAyahs = [];
+            versesConfig.forEach(conf => {
+                const found = window.hafsData.find(aya => aya.sura_no === conf.sura && aya.aya_no === conf.aya);
+                if (found) {
+                    currentAyahs.push({
+                        numberInSurah: found.aya_no,
+                        text: found.aya_text,
+                        surahNameAr: found.sura_name_ar,
+                        surahNameEn: found.sura_name_en,
+                        surahNumber: found.sura_no
+                    });
+                }
+            });
+
+            if (currentAyahs.length === 0) return;
+
+            let displayName = specialName.replace("Memorize_", "").replace(/_/g, " ");
+            surahNameEl.textContent = displayName;
+            
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }, 500);
+            
+            initializePart(0, currentAyahs.length - 1, currentAyahs[0].surahNumber);
+        }
+
+        function loadSurahData(surahNumber) {
+            // Filter ayahs for the requested surah
+            currentAyahs = window.hafsData.filter(aya => aya.sura_no === surahNumber).map(aya => ({
+                numberInSurah: aya.aya_no,
+                text: aya.aya_text,
+                surahNameAr: aya.sura_name_ar,
+                surahNameEn: aya.sura_name_en,
+                surahNumber: surahNumber
+            }));
+
+            if (currentAyahs.length === 0) return;
+
+            const firstAyah = currentAyahs[0];
+            surahNameEl.textContent = `Surah ${firstAyah.surahNameEn}`;
+
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }, 500);
+
+            if (currentAyahs.length > 10) {
+                showPartsOverlay(surahNumber);
+            } else {
+                initializePart(0, currentAyahs.length - 1, surahNumber);
+            }
+        }
+
+        function showPartsOverlay(surahNumber) {
+            const partsOverlay = document.getElementById('parts-overlay');
+            const partsContainer = document.getElementById('parts-container');
+            partsContainer.innerHTML = '';
+            
+            const totalAyahs = currentAyahs.length;
+            const partsCount = Math.ceil(totalAyahs / 10);
+            
+            for (let i = 0; i < partsCount; i++) {
+                const startIdx = i * 10;
+                const endIdx = Math.min((i + 1) * 10 - 1, totalAyahs - 1);
+                
+                const btn = document.createElement('button');
+                btn.className = 'btn-part';
+                btn.innerHTML = `
+                    <span class="btn-part-num">Part ${i + 1}</span>
+                    <span class="btn-part-range">Verses ${startIdx + 1} – ${endIdx + 1}</span>
+                `;
+                btn.onclick = () => {
+                    partsOverlay.classList.remove('active');
+                    initializePart(startIdx, endIdx, surahNumber);
+                };
+                partsContainer.appendChild(btn);
+            }
+            
+            const btnCustomFrom = document.getElementById('btn-custom-from');
+            const customFromText = document.getElementById('custom-from-text');
+            const customFromMenu = document.getElementById('custom-from-menu');
+
+            const btnCustomTo = document.getElementById('btn-custom-to');
+            const customToText = document.getElementById('custom-to-text');
+            const customToMenu = document.getElementById('custom-to-menu');
+
+            const btnCustomStart = document.getElementById('btn-custom-start');
+
+            let selectedFromVerse = 1;
+            let selectedToVerse = Math.min(10, totalAyahs);
+
+            function renderCustomMenu(menuEl, textEl, minVal, maxVal, currentVal, onSelect) {
+                menuEl.innerHTML = '';
+                for (let v = minVal; v <= maxVal; v++) {
+                    const item = document.createElement('div');
+                    item.className = 'custom-range-item' + (v === currentVal ? ' active' : '');
+                    item.textContent = `Verse ${v}`;
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        menuEl.classList.remove('active');
+                        onSelect(v);
+                    };
+                    menuEl.appendChild(item);
+                }
+                textEl.textContent = `Verse ${currentVal}`;
+            }
+
+            function updateCustomPickers() {
+                // 'From' verse can be selected from 1 to totalAyahs
+                renderCustomMenu(customFromMenu, customFromText, 1, totalAyahs, selectedFromVerse, (v) => {
+                    selectedFromVerse = v;
+                    // If 'To' is lower than or equal to 'From', auto increase 'To'
+                    if (selectedToVerse < selectedFromVerse) {
+                        selectedToVerse = Math.min(selectedFromVerse + 1, totalAyahs);
+                    }
+                    updateCustomPickers();
+                });
+
+                // 'To' verse menu shows options starting from selectedFromVerse to totalAyahs
+                renderCustomMenu(customToMenu, customToText, selectedFromVerse, totalAyahs, selectedToVerse, (v) => {
+                    selectedToVerse = v;
+                    updateCustomPickers();
+                });
+            }
+
+            updateCustomPickers();
+
+            btnCustomFrom.onclick = (e) => {
+                e.stopPropagation();
+                customToMenu.classList.remove('active');
+                customFromMenu.classList.toggle('active');
+            };
+
+            btnCustomTo.onclick = (e) => {
+                e.stopPropagation();
+                customFromMenu.classList.remove('active');
+                customToMenu.classList.toggle('active');
+            };
+
+            // Close popup menus on click outside
+            document.addEventListener('click', (e) => {
+                if (customFromMenu && !document.getElementById('custom-from-wrapper')?.contains(e.target)) {
+                    customFromMenu.classList.remove('active');
+                }
+                if (customToMenu && !document.getElementById('custom-to-wrapper')?.contains(e.target)) {
+                    customToMenu.classList.remove('active');
+                }
+            });
+
+            btnCustomStart.onclick = () => {
+                customFromMenu.classList.remove('active');
+                customToMenu.classList.remove('active');
+                partsOverlay.classList.remove('active');
+                initializePart(selectedFromVerse - 1, selectedToVerse - 1, surahNumber);
+            };
+            
+            partsOverlay.classList.add('active');
+        }
+
+        function initializePart(startIdx, endIdx, surahNumber) {
+            currentStartIdx = startIdx;
+            currentEndIdx = endIdx;
+            if (surahDetailsEl) {
+                surahDetailsEl.textContent = `Verses ${startIdx + 1} - ${endIdx + 1} • Memorization Mode`;
+            }
+            
+            renderAyahs(startIdx, endIdx, surahNumber);
+            generateMemorizationPlaylist(startIdx, endIdx);
+            
+            updateUI();
+            
+            // Auto play on open or show instructions
+            if (localStorage.getItem('hideHifzWelcome') !== 'true') {
+                document.getElementById('welcome-overlay').classList.add('active');
+            } else {
+                if (!isPlaying && currentAyahs.length > 0) {
+                    playCurrentItem();
+                }
+            }
+        }
+
+        function renderAyahs(startIdx, endIdx, surahNumber) {
+            quranReader.innerHTML = '';
+
+            // Bismillah for surahs except 1 and 9, and only if it's the very first verse of the surah
+            if (surahNumber !== 1 && surahNumber !== 9 && currentAyahs[startIdx] && currentAyahs[startIdx].numberInSurah === 1) {
+                const bismillah = document.createElement('div');
+                bismillah.className = 'bismillah';
+                bismillah.textContent = 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ';
+                quranReader.appendChild(bismillah);
+            }
+
+            for (let index = startIdx; index <= endIdx; index++) {
+                const ayah = currentAyahs[index];
+                const div = document.createElement('div');
+                div.className = 'ayah';
+                div.id = `ayah-${index}`;
+                
+                // Allow clicking to jump to this verse in the playlist
+                div.addEventListener('click', () => {
+                    jumpToVerse(index);
+                });
+
+                div.innerHTML = `
+                    <div class="ayah-text">
+                        ${ayah.text}
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-${index}"></div>
+                    </div>
+                `;
+                quranReader.appendChild(div);
+            }
+        }
+
+        // The core logic for memorization sequence
+        function generateMemorizationPlaylist(startIdx, endIdx) {
+            playlist = [];
+
+            for (let n = startIdx; n <= endIdx; n++) {
+                // Learn verse N multiple times (based on globalRepetitionCount)
+                for (let iter = 1; iter <= globalRepetitionCount; iter++) {
+                    playlist.push({ mode: 'Learn', verseIndex: n, iteration: iter, total: globalRepetitionCount });
+                }
+                
+                // Recap from startIdx to N
+                if (n > startIdx) {
+                    for (let i = startIdx; i <= n; i++) {
+                        playlist.push({ mode: 'Recap', verseIndex: i, iteration: 1, total: 1 });
+                    }
+                }
+            }
+        }
+
+        function jumpToVerse(verseIndex) {
+            // Find the first occurrence of this verse in Learn mode
+            const playlistIndex = playlist.findIndex(item => item.verseIndex === verseIndex && item.mode === 'Learn' && item.iteration === 1);
+            if (playlistIndex !== -1) {
+                currentPlaylistIndex = playlistIndex;
+                if (isPlaying) {
+                    playCurrentItem();
+                } else {
+                    updateUI();
+                }
+            }
+        }
+
+        // Audio & Playback Logic
+        function playCurrentItem() {
+            if (currentPlaylistIndex >= playlist.length) {
+                // Finished
+                isPlaying = false;
+                updateUI();
+                return;
+            }
+
+            const currentItem = playlist[currentPlaylistIndex];
+            const ayah = currentAyahs[currentItem.verseIndex];
+            
+            const activeSurahNum = ayah.surahNumber || currentAyahs[0].surahNumber || 1;
+            const sPad = String(activeSurahNum).padStart(3, '0');
+            const aPad = String(ayah.numberInSurah).padStart(3, '0');
+            
+            audioEl.src = `https://everyayah.com/data/${currentReciter}/${sPad}${aPad}.mp3`;
+            audioEl.play().catch(e => console.error("Playback failed", e));
+            isPlaying = true;
+            
+            updateUI();
+        }
+
+        function togglePlayPause() {
+            if (audioEl.paused) {
+                if (!audioEl.src || audioEl.src === window.location.href) {
+                    playCurrentItem();
+                } else {
+                    audioEl.play();
+                }
+                isPlaying = true;
+            } else {
+                audioEl.pause();
+                isPlaying = false;
+            }
+            updatePlayPauseIcon();
+        }
+
+        function playNext() {
+            if (currentPlaylistIndex < playlist.length - 1) {
+                currentPlaylistIndex++;
+                if (isPlaying) playCurrentItem();
+                else updateUI();
+            }
+        }
+
+        function playPrev() {
+            if (currentPlaylistIndex > 0) {
+                currentPlaylistIndex--;
+                if (isPlaying) playCurrentItem();
+                else updateUI();
+            }
+        }
+
+        // Update UI states based on current playlist item
+        function updateUI() {
+            updatePlayPauseIcon();
+
+            if (playlist.length === 0) return;
+            
+            const item = playlist[currentPlaylistIndex];
+            const actualVerseNum = currentAyahs[item.verseIndex].numberInSurah;
+
+            // Update Top Bar
+            statusVerse.textContent = actualVerseNum;
+            const totalDisplay = item.total >= 999 ? '∞' : item.total;
+            statusRepetition.textContent = `${item.iteration} / ${totalDisplay}`;
+            
+            modeBadge.textContent = item.mode;
+            if (item.mode === 'Learn') {
+                modeBadge.className = 'mode-badge learn';
+            } else {
+                modeBadge.className = 'mode-badge recap';
+            }
+
+            // Update Ayah Highlighting
+            document.querySelectorAll('.ayah').forEach(el => {
+                el.classList.remove('active');
+                el.classList.remove('recap');
+            });
+            const activeAyahEl = document.getElementById(`ayah-${item.verseIndex}`);
+            if (activeAyahEl) {
+                activeAyahEl.classList.add('active');
+                if (item.mode === 'Recap') {
+                    activeAyahEl.classList.add('recap');
+                }
+                
+                // Scroll into view if needed
+                const rect = activeAyahEl.getBoundingClientRect();
+                if (rect.top < 100 || rect.bottom > window.innerHeight - 150) {
+                    activeAyahEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        function updatePlayPauseIcon() {
+            if (isPlaying) {
+                iconPlay.style.display = 'none';
+                iconPause.style.display = 'block';
+            } else {
+                iconPlay.style.display = 'block';
+                iconPause.style.display = 'none';
+            }
+        }
+
+        // Event Listeners
+        btnPlayPause.addEventListener('click', togglePlayPause);
+        const btnNext = document.getElementById('btn-next');
+        const btnPrev = document.getElementById('btn-prev');
+        if (btnNext) btnNext.addEventListener('click', playNext);
+        if (btnPrev) btnPrev.addEventListener('click', playPrev);
+
+        function updateReciterUI(val) {
+            let selectedText = "Reciter";
+            document.querySelectorAll('.reciter-menu-item').forEach(item => {
+                if (item.getAttribute('data-val') === val) {
+                    item.classList.add('active');
+                    selectedText = item.textContent.trim();
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            if (reciterDisplayName) {
+                reciterDisplayName.textContent = selectedText;
+            }
+        }
+
+        btnCustomReciter.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (repeatMenu) repeatMenu.classList.remove('active');
+            reciterMenu.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.reciter-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const val = item.getAttribute('data-val');
+                if (val) {
+                    currentReciter = val;
+                    localStorage.setItem('hifzSelectedReciter', currentReciter);
+                    updateReciterUI(currentReciter);
+                    reciterMenu.classList.remove('active');
+                    if (isPlaying) {
+                        playCurrentItem();
+                    }
+                }
+            });
+        });
+
+        function updateRepeatUI(count) {
+            if (repeatDisplayValue) {
+                repeatDisplayValue.textContent = count >= 999 ? '∞' : `${count}x`;
+            }
+            document.querySelectorAll('.repeat-menu-item').forEach(item => {
+                if (parseInt(item.getAttribute('data-val'), 10) === count) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        btnCustomRepeat.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (reciterMenu) reciterMenu.classList.remove('active');
+            repeatMenu.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.repeat-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const count = parseInt(item.getAttribute('data-val'), 10);
+                if (count > 0) {
+                    globalRepetitionCount = count;
+                    localStorage.setItem('selectedRepeatCount', globalRepetitionCount);
+                    updateRepeatUI(globalRepetitionCount);
+                    repeatMenu.classList.remove('active');
+                    if (currentAyahs.length > 0) {
+                        const currentVerseIndex = playlist[currentPlaylistIndex]?.verseIndex ?? currentStartIdx;
+                        generateMemorizationPlaylist(currentStartIdx, currentEndIdx);
+                        jumpToVerse(currentVerseIndex);
+                    }
+                }
+            });
+        });
+
+        // Close menus on clicking outside
+        document.addEventListener('click', (e) => {
+            if (repeatMenu && !document.getElementById('repeat-control-wrapper').contains(e.target)) {
+                repeatMenu.classList.remove('active');
+            }
+            if (reciterMenu && !document.getElementById('reciter-control-wrapper').contains(e.target)) {
+                reciterMenu.classList.remove('active');
+            }
+        });
+
+        audioEl.addEventListener('ended', () => {
+            btnPlayPause.classList.remove('buffering');
+            if (currentPlaylistIndex < playlist.length - 1) {
+                currentPlaylistIndex++;
+                playCurrentItem();
+            } else {
+                isPlaying = false;
+                updatePlayPauseIcon();
+                document.getElementById('finished-overlay').classList.add('active');
+            }
+        });
+
+        audioEl.addEventListener('waiting', () => {
+            btnPlayPause.classList.add('buffering');
+        });
+
+        audioEl.addEventListener('loadstart', () => {
+            if (isPlaying) {
+                btnPlayPause.classList.add('buffering');
+            }
+        });
+
+        audioEl.addEventListener('canplay', () => {
+            btnPlayPause.classList.remove('buffering');
+        });
+
+        audioEl.addEventListener('playing', () => {
+            btnPlayPause.classList.remove('buffering');
+            isPlaying = true;
+            updatePlayPauseIcon();
+        });
+
+        audioEl.addEventListener('pause', () => {
+            btnPlayPause.classList.remove('buffering');
+            if (audioEl.paused) {
+                isPlaying = false;
+                updatePlayPauseIcon();
+            }
+        });
+
+        audioEl.addEventListener('error', (e) => {
+            btnPlayPause.classList.remove('buffering');
+            isPlaying = false;
+            updatePlayPauseIcon();
+            console.warn("Audio failed to load, check internet connection.", e);
+        });
+
+        // Time Update for Progress Bar
+        audioEl.addEventListener('timeupdate', () => {
+            if (!isPlaying || currentPlaylistIndex >= playlist.length) return;
+            const item = playlist[currentPlaylistIndex];
+            const progressEl = document.getElementById(`progress-${item.verseIndex}`);
+            if (progressEl && audioEl.duration) {
+                const percent = (audioEl.currentTime / audioEl.duration) * 100;
+                progressEl.style.width = `${percent}%`;
+            }
+        });
+
+        // Reset progress bar on end or stop
+        function resetProgress() {
+            document.querySelectorAll('.progress-bar').forEach(el => el.style.width = '0%');
+        }
+        audioEl.addEventListener('ended', resetProgress);
+        audioEl.addEventListener('playing', resetProgress);
+
+        // Back Button Handling
+        window.addEventListener('popstate', (e) => {
+            handleClose();
+        });
+
+        // Capacitor Native Back Button listener if available
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.addListener('backButton', () => {
+                const partsOverlay = document.getElementById('parts-overlay');
+                const welcomeOverlay = document.getElementById('welcome-overlay');
+                const finishedOverlay = document.getElementById('finished-overlay');
+
+                if (partsOverlay && partsOverlay.classList.contains('active')) {
+                    partsOverlay.classList.remove('active');
+                    handleClose();
+                } else if (welcomeOverlay && welcomeOverlay.classList.contains('active')) {
+                    welcomeOverlay.classList.remove('active');
+                } else if (finishedOverlay && finishedOverlay.classList.contains('active')) {
+                    finishedOverlay.classList.remove('active');
+                    handleClose();
+                } else {
+                    handleClose();
+                }
+            });
+        }
+
+        // Prevent long press context menu
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // Run
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+
+            // Welcome Overlay Logic
+            const welcomeOverlay = document.getElementById('welcome-overlay');
+            const btnLangEn = document.getElementById('btn-lang-en');
+            const btnLangMl = document.getElementById('btn-lang-ml');
+            const textEn = document.getElementById('welcome-text-en');
+            const textMl = document.getElementById('welcome-text-ml');
+            const btnWelcomeOk = document.getElementById('btn-welcome-ok');
+            const cbDontShow = document.getElementById('dont-show-again');
+            const cbLabel = document.getElementById('welcome-cb-label');
+            
+            btnLangEn.addEventListener('click', () => {
+                btnLangEn.classList.add('active');
+                btnLangMl.classList.remove('active');
+                textEn.classList.add('active');
+                textMl.classList.remove('active');
+                btnWelcomeOk.textContent = 'Okay';
+                if (cbLabel) cbLabel.textContent = "Don't show again";
+            });
+            
+            btnLangMl.addEventListener('click', () => {
+                btnLangMl.classList.add('active');
+                btnLangEn.classList.remove('active');
+                textMl.classList.add('active');
+                textEn.classList.remove('active');
+                btnWelcomeOk.textContent = 'ശരി';
+                if (cbLabel) cbLabel.textContent = 'ഇനി കാണിക്കരുത്';
+            });
+            
+            btnWelcomeOk.addEventListener('click', () => {
+                if (cbDontShow.checked) {
+                    localStorage.setItem('hideHifzWelcome', 'true');
+                }
+                welcomeOverlay.classList.remove('active');
+                
+                // Start playing after okay
+                if (!isPlaying && currentAyahs.length > 0) {
+                    playCurrentItem();
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
