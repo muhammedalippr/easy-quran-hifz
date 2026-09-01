@@ -28,6 +28,7 @@ public class MainActivity extends BridgeActivity {
     private static final String BANNER_AD_UNIT_ID = "ca-app-pub-1448372299256521/6027622764";
     private static final int UPDATE_REQUEST_CODE = 500;
     
+    private FrameLayout adContainer;
     private AppUpdateManager appUpdateManager;
     private AdView adView;
 
@@ -67,27 +68,94 @@ public class MainActivity extends BridgeActivity {
                 return;
             }
 
+            // Find or create the dedicated ad container at bottom
+            ViewGroup rootView = findViewById(android.R.id.content);
+            if (rootView == null) return;
+
+            // Get Bridge WebView
+            android.webkit.WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+
+            adContainer = new FrameLayout(this);
+            FrameLayout.LayoutParams containerParams = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            containerParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            adContainer.setLayoutParams(containerParams);
+            adContainer.setBackgroundColor(0xFF000000);
+            adContainer.setVisibility(android.view.View.GONE); // Initially 0 height until loaded
+
             adView = new AdView(this);
             adView.setAdUnitId(BANNER_AD_UNIT_ID);
             adView.setAdSize(getAdaptiveAdSize());
 
-            // Add AdView at the bottom of the Root Layout
-            ViewGroup rootView = findViewById(android.R.id.content);
-            if (rootView != null) {
-                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                );
-                params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                adView.setLayoutParams(params);
-                rootView.addView(adView);
+            adView.setAdListener(new com.google.android.gms.ads.AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    Log.d(TAG, "AdMob banner loaded successfully.");
+                    runOnUiThread(() -> updateBannerVisibility(true, webView));
+                }
 
-                AdRequest adRequest = new AdRequest.Builder().build();
-                adView.loadAd(adRequest);
-                Log.d(TAG, "AdMob native banner loadAd() requested for " + BANNER_AD_UNIT_ID);
-            }
+                @Override
+                public void onAdFailedToLoad(com.google.android.gms.ads.LoadAdError loadAdError) {
+                    super.onAdFailedToLoad(loadAdError);
+                    Log.w(TAG, "AdMob banner failed to load: " + loadAdError.getMessage());
+                    runOnUiThread(() -> updateBannerVisibility(false, webView));
+                }
+
+                @Override
+                public void onAdOpened() {
+                    super.onAdOpened();
+                }
+
+                @Override
+                public void onAdClosed() {
+                    super.onAdClosed();
+                }
+            });
+
+            adContainer.addView(adView);
+            rootView.addView(adContainer);
+
+            AdRequest adRequest = new AdRequest.Builder().build();
+            adView.loadAd(adRequest);
+            Log.d(TAG, "AdMob native banner loadAd() requested for " + BANNER_AD_UNIT_ID);
+
         } catch (Exception e) {
             Log.e(TAG, "Failed to create/load native AdView", e);
+        }
+    }
+
+    private void updateBannerVisibility(boolean isLoaded, android.webkit.WebView webView) {
+        if (adContainer != null && adView != null) {
+            if (isLoaded) {
+                adContainer.setVisibility(android.view.View.VISIBLE);
+                // Calculate exact height of the adaptive banner in pixels
+                adContainer.post(() -> {
+                    int bannerHeight = adContainer.getHeight();
+                    if (bannerHeight == 0) {
+                        bannerHeight = (int) (getAdaptiveAdSize().getHeightInPixels(this));
+                    }
+                    if (webView != null) {
+                        // Apply bottom margin/padding to WebView so no UI is covered
+                        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) webView.getLayoutParams();
+                        if (lp != null && lp.bottomMargin != bannerHeight) {
+                            lp.bottomMargin = bannerHeight;
+                            webView.setLayoutParams(lp);
+                        }
+                    }
+                });
+            } else {
+                adContainer.setVisibility(android.view.View.GONE);
+                if (webView != null) {
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) webView.getLayoutParams();
+                    if (lp != null && lp.bottomMargin != 0) {
+                        lp.bottomMargin = 0;
+                        webView.setLayoutParams(lp);
+                    }
+                }
+            }
         }
     }
 
