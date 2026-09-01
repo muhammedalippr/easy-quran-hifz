@@ -125,7 +125,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         if (adView != null) {
             adView.resume();
@@ -149,7 +149,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         if (adView != null) {
             adView.pause();
         }
@@ -157,7 +157,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         if (adView != null) {
             adView.destroy();
         }
