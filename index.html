@@ -42,18 +42,18 @@
 
         @media (prefers-color-scheme: light) {
             :root {
-                --bg-color: #f8fafc;
+                --bg-color: #f4f4f5;
                 --surface-color: #ffffff;
                 --surface-hover: #f1f5f9;
-                --border-color: #e2e8f0;
+                --border-color: #e4e4e7;
                 --primary-color: #059669;
-                --primary-glow: rgba(5, 150, 105, 0.25);
-                --text-main: #0f172a;
-                --text-muted: #64748b;
-                --header-bg: rgba(248, 250, 252, 0.9);
-                --input-bg: #f1f5f9;
-                --num-bg: #e6f7f0;
-                --card-arabic: #1e293b;
+                --primary-glow: rgba(5, 150, 105, 0.2);
+                --text-main: #18181b;
+                --text-muted: #71717a;
+                --header-bg: rgba(244, 244, 245, 0.92);
+                --input-bg: #ffffff;
+                --num-bg: #ecfdf5;
+                --card-arabic: #27272a;
             }
         }
 
@@ -79,6 +79,13 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                background-color: #f8fafc;
+                background-image: none !important;
+            }
         }
 
         input, textarea {

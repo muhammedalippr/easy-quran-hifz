@@ -100,8 +100,16 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onAdFailedToLoad(com.google.android.gms.ads.LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
-                    Log.w(TAG, "AdMob banner failed to load: " + loadAdError.getMessage());
+                    Log.w(TAG, "AdMob banner failed to load: " + loadAdError.getMessage() + ". Retrying in 30s...");
                     runOnUiThread(() -> updateBannerVisibility(false, webView));
+                    
+                    // Automatically retry loading after 30 seconds
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (adView != null) {
+                            AdRequest retryRequest = new AdRequest.Builder().build();
+                            adView.loadAd(retryRequest);
+                        }
+                    }, 30000);
                 }
 
                 @Override

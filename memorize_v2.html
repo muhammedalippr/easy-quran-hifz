@@ -58,23 +58,23 @@
 
         @media (prefers-color-scheme: light) {
             :root {
-                --bg-color: #f8fafc;
+                --bg-color: #f4f4f5;
                 --surface-color: #ffffff;
-                --surface-hover: #f1f5f9;
-                --border-color: #e2e8f0;
+                --surface-hover: #e4e4e7;
+                --border-color: #e4e4e7;
                 --primary-color: #059669;
-                --primary-glow: rgba(5, 150, 105, 0.25);
-                --text-main: #0f172a;
-                --text-muted: #64748b;
-                --bar-bg: rgba(248, 250, 252, 0.94);
+                --primary-glow: rgba(5, 150, 105, 0.2);
+                --text-main: #18181b;
+                --text-muted: #71717a;
+                --bar-bg: rgba(244, 244, 245, 0.94);
                 --menu-bg: rgba(255, 255, 255, 0.98);
-                --ayah-inactive: #1e293b;
+                --ayah-inactive: #27272a;
                 --ayah-active-color: #047857;
                 --ayah-recap-color: #b45309;
                 --ctrl-btn-bg: #ffffff;
-                --ctrl-btn-border: #cbd5e1;
-                --ctrl-btn-color: #0f172a;
-                --memo-shadow: none;
+                --ctrl-btn-border: #d4d4d8;
+                --ctrl-btn-color: #18181b;
+                --memo-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
                 --active-ayah-bg: #ecfdf5;
                 --active-recap-bg: #fffbeb;
             }
@@ -104,6 +104,13 @@
             -ms-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                background-color: #f4f4f5;
+                background-image: none !important;
+            }
         }
 
         /* Top Bar */
@@ -398,47 +405,53 @@
         .play-pause-btn {
             background: var(--primary-color);
             color: #000;
-            width: 56px;
-            height: 56px;
+            width: 38px;
+            height: 38px;
             border: none;
-            box-shadow: 0 4px 15px var(--primary-glow);
+            box-shadow: 0 3px 12px var(--primary-glow);
             position: relative;
             transition: all 0.2s ease;
         }
 
         .play-pause-btn:hover {
             background: #34d399;
-            box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5);
+            box-shadow: 0 4px 15px rgba(52, 211, 153, 0.5);
             color: #000;
         }
 
         .play-pause-btn.buffering {
-            animation: pulseGlow 1.2s ease-in-out infinite;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
 
-        .play-pause-btn.buffering svg {
-            animation: rotateBuffering 1s linear infinite;
+        .play-pause-btn.buffering::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--primary-color);
+            border-right-color: rgba(52, 211, 153, 0.6);
+            animation: spinRing 0.85s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+            pointer-events: none;
         }
 
-        @keyframes rotateBuffering {
+        @keyframes spinRing {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(0.95); opacity: 0.85; }
-        }
-
         .control-btn svg {
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             fill: currentColor;
         }
 
         .play-pause-btn svg {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             transition: transform 0.2s ease;
         }
 
@@ -538,7 +551,8 @@
         /* Custom Reciter Control */
         .reciter-control-wrapper {
             position: relative;
-            display: inline-block;
+            flex: 1;
+            min-width: 0;
         }
 
         .custom-reciter-btn {
@@ -555,7 +569,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            max-width: 170px;
+            width: 100%;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             -webkit-tap-highlight-color: transparent;
         }
@@ -699,29 +713,29 @@
         .btn-close:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
         /* Welcome Overlay */
         .welcome-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: center; z-index: 10001; opacity: 0; transition: opacity 0.4s ease;
         }
         .welcome-overlay.active { display: flex; opacity: 1; }
         .welcome-content {
-            background: var(--bg-color); border: 1px solid var(--border-color);
-            padding: 1.2rem; border-radius: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.05);
+            background: var(--surface-color); border: 1px solid var(--border-color);
+            padding: 1.5rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
             max-width: 90%; width: 550px; overflow-y: hidden;
         }
         .welcome-content::-webkit-scrollbar { display: none; }
-        .welcome-header { display: flex; justify-content: center; margin-bottom: 0.8rem; }
-        .lang-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 30px; padding: 5px; }
+        .welcome-header { display: flex; justify-content: center; margin-bottom: 1rem; }
+        .lang-toggle { display: flex; background: var(--surface-hover); border: 1px solid var(--border-color); border-radius: 30px; padding: 4px; }
         .lang-btn {
-            background: transparent; border: none; color: var(--text-muted); padding: 0.4rem 1.2rem;
-            border-radius: 25px; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.3s;
+            background: transparent; border: none; color: var(--text-muted); padding: 0.45rem 1.2rem;
+            border-radius: 25px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 0.88rem; transition: all 0.3s;
         }
-        .lang-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
-        .welcome-text { display: none; text-align: center; line-height: 1.4; color: rgba(255, 255, 255, 0.85); font-size: 0.85rem; }
+        .lang-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 3px 10px var(--primary-glow); }
+        .welcome-text { display: none; text-align: center; line-height: 1.5; color: var(--text-main); font-size: 0.88rem; }
         .welcome-text.active { display: block; animation: fadeIn 0.4s; }
-        .welcome-text h2 { text-align: center; color: var(--primary-color); margin-bottom: 0.6rem; font-size: 1.3rem; }
-        .welcome-text p { margin-bottom: 0.5rem; }
+        .welcome-text h2 { text-align: center; color: var(--primary-color); margin-bottom: 0.8rem; font-size: 1.35rem; font-weight: 700; }
+        .welcome-text p { margin-bottom: 0.6rem; color: var(--text-main); opacity: 0.9; }
         
-        .welcome-footer { margin-top: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+        .welcome-footer { margin-top: 1.2rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
         
         /* Custom Checkbox */
         .checkbox-container {
@@ -758,12 +772,12 @@
         }
         .parts-overlay.active { display: flex; opacity: 1; }
         .parts-content {
-            background: rgba(18, 18, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 1.5rem 1.25rem; border-radius: 24px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: var(--surface-color); border: 1px solid var(--border-color);
+            padding: 1.5rem 1.25rem; border-radius: 24px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
             max-width: 420px; width: 100%; max-height: 82vh; display: flex; flex-direction: column; text-align: center;
         }
         .parts-header-title {
-            font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.2rem;
+            font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.2rem;
             letter-spacing: -0.2px;
         }
         .parts-subtitle {
@@ -777,10 +791,10 @@
             padding: 2px 2px 6px;
         }
         .parts-container::-webkit-scrollbar { width: 4px; }
-        .parts-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        .parts-container::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
         .btn-part {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: var(--surface-hover);
+            border: 1px solid var(--border-color);
             color: var(--text-main);
             padding: 0.75rem 0.6rem;
             border-radius: 14px;
@@ -796,12 +810,12 @@
         .btn-part-num {
             font-size: 0.92rem;
             font-weight: 600;
-            color: #f1f5f9;
+            color: var(--text-main);
         }
         .btn-part-range {
             font-size: 0.72rem;
-            color: #10b981;
-            font-weight: 500;
+            color: var(--primary-color);
+            font-weight: 600;
             letter-spacing: 0.2px;
         }
         .btn-part:hover, .btn-part:active {
@@ -814,7 +828,7 @@
             background: rgba(16, 185, 129, 0.05);
         }
         .custom-range-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--surface-hover);
             border: 1px solid rgba(16, 185, 129, 0.25);
             border-radius: 16px;
             padding: 0.85rem;
@@ -1084,6 +1098,27 @@
                 <svg id="icon-pause" viewBox="0 0 24 24" style="display: none;"><path d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z" /></svg>
             </button>
 
+            <div class="repeat-control-wrapper" id="repeat-control-wrapper">
+                <button type="button" class="custom-repeat-btn" id="btn-custom-repeat" title="Repeat Count">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                    </svg>
+                    <span id="repeat-display-value">3x</span>
+                </button>
+                <div class="repeat-menu" id="repeat-menu">
+                    <div class="repeat-menu-item" data-val="1">1x</div>
+                    <div class="repeat-menu-item" data-val="2">2x</div>
+                    <div class="repeat-menu-item active" data-val="3">3x</div>
+                    <div class="repeat-menu-item" data-val="4">4x</div>
+                    <div class="repeat-menu-item" data-val="5">5x</div>
+                    <div class="repeat-menu-item" data-val="6">6x</div>
+                    <div class="repeat-menu-item" data-val="7">7x</div>
+                    <div class="repeat-menu-item" data-val="8">8x</div>
+                    <div class="repeat-menu-item" data-val="9">9x</div>
+                    <div class="repeat-menu-item" data-val="999" style="font-size: 1.1rem; line-height: 1;">∞</div >
+                </div>
+            </div>
+
             <div class="reciter-control-wrapper" id="reciter-control-wrapper">
                 <button type="button" class="custom-reciter-btn" id="btn-custom-reciter" title="Select Reciter">
                     <svg viewBox="0 0 24 24">
@@ -1105,27 +1140,6 @@
                     <div class="reciter-menu-item" data-val="Saood_ash-Shuraym_128kbps">Saud Al-Shuraim</div>
                     <div class="reciter-menu-item" data-val="Husary_128kbps">Mahmoud Khalil Al-Husary</div>
                     <div class="reciter-menu-item" data-val="Salaah_AbdulRahman_Bukhatir_128kbps">Salah Bukhatir</div>
-                </div>
-            </div>
-
-            <div class="repeat-control-wrapper" id="repeat-control-wrapper">
-                <button type="button" class="custom-repeat-btn" id="btn-custom-repeat" title="Repeat Count">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
-                    </svg>
-                    <span id="repeat-display-value">3x</span>
-                </button>
-                <div class="repeat-menu" id="repeat-menu">
-                    <div class="repeat-menu-item" data-val="1">1x</div>
-                    <div class="repeat-menu-item" data-val="2">2x</div>
-                    <div class="repeat-menu-item active" data-val="3">3x</div>
-                    <div class="repeat-menu-item" data-val="4">4x</div>
-                    <div class="repeat-menu-item" data-val="5">5x</div>
-                    <div class="repeat-menu-item" data-val="6">6x</div>
-                    <div class="repeat-menu-item" data-val="7">7x</div>
-                    <div class="repeat-menu-item" data-val="8">8x</div>
-                    <div class="repeat-menu-item" data-val="9">9x</div>
-                    <div class="repeat-menu-item" data-val="999" style="font-size: 1.1rem; line-height: 1;">∞</div >
                 </div>
             </div>
         </div>
