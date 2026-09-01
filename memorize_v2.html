@@ -244,7 +244,7 @@
         .quran-reader {
             flex: 1;
             overflow-y: auto;
-            padding: 2rem 15% 150px;
+            padding: 2rem 15% 210px;
             scroll-behavior: smooth;
         }
 
@@ -348,11 +348,11 @@
         /* Bottom Player */
         .player-bar {
             position: fixed;
-            bottom: 0;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
             left: 0;
             right: 0;
             padding-top: 10px;
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+            padding-bottom: 10px;
             padding-left: 16px;
             padding-right: 16px;
             background: var(--bar-bg);
