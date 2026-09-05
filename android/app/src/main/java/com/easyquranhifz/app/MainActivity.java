@@ -36,13 +36,16 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setNavigationBarColor(0xFF000000);
-        window.setStatusBarColor(0xFF050505);
+        
+        // Enable Edge-to-Edge display
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        window.setNavigationBarColor(android.graphics.Color.TRANSPARENT);
         
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
-        controller.setAppearanceLightNavigationBars(false);
-        controller.setAppearanceLightStatusBars(false);
+        boolean isNightMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        controller.setAppearanceLightStatusBars(!isNightMode);
+        controller.setAppearanceLightNavigationBars(!isNightMode);
 
         // 1. Initialize Mobile Ads SDK and load persistent native banner
         initNativeAdMobBanner();
@@ -53,8 +56,20 @@ public class MainActivity extends BridgeActivity {
 
     private void initNativeAdMobBanner() {
         try {
+            // Register connected devices as official AdMob Test Devices
+            java.util.List<String> testDeviceIds = java.util.Arrays.asList(
+                    com.google.android.gms.ads.AdRequest.DEVICE_ID_EMULATOR,
+                    "B4E2E483CD0D45216307C4987EFBEBD5", // Pixel 5a
+                    "43BFD815A57FB144E7F6A49430A4E757"  // Realme / Second Device
+            );
+            com.google.android.gms.ads.RequestConfiguration configuration =
+                    new com.google.android.gms.ads.RequestConfiguration.Builder()
+                            .setTestDeviceIds(testDeviceIds)
+                            .build();
+            MobileAds.setRequestConfiguration(configuration);
+
             MobileAds.initialize(this, initializationStatus -> {
-                Log.d(TAG, "Native MobileAds initialized.");
+                Log.d(TAG, "Native MobileAds initialized with Test Device.");
                 runOnUiThread(this::loadBanner);
             });
         } catch (Exception e) {
@@ -85,6 +100,16 @@ public class MainActivity extends BridgeActivity {
             adContainer.setBackgroundColor(0xFF000000);
             adContainer.setVisibility(android.view.View.GONE); // Initially 0 height until loaded
 
+            // Dynamically get the exact bottom system navigation bar height in pixels
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(adContainer, (v, insets) -> {
+                int systemBottomBarHeight = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
+                adContainer.setPadding(0, 0, 0, systemBottomBarHeight);
+                if (adContainer.getVisibility() == android.view.View.VISIBLE) {
+                    updateBannerVisibility(true, webView);
+                }
+                return insets;
+            });
+
             adView = new AdView(this);
             adView.setAdUnitId(BANNER_AD_UNIT_ID);
             adView.setAdSize(getAdaptiveAdSize());
@@ -93,23 +118,15 @@ public class MainActivity extends BridgeActivity {
                 @Override
                 public void onAdLoaded() {
                     super.onAdLoaded();
-                    Log.d(TAG, "AdMob banner loaded successfully.");
+                    Log.d(TAG, "AdMob banner loaded: calculating height instantly.");
                     runOnUiThread(() -> updateBannerVisibility(true, webView));
                 }
 
                 @Override
                 public void onAdFailedToLoad(com.google.android.gms.ads.LoadAdError loadAdError) {
                     super.onAdFailedToLoad(loadAdError);
-                    Log.w(TAG, "AdMob banner failed to load: " + loadAdError.getMessage() + ". Retrying in 30s...");
+                    Log.w(TAG, "AdMob banner no-fill/failed: resetting gap to 0px instantly.");
                     runOnUiThread(() -> updateBannerVisibility(false, webView));
-                    
-                    // Automatically retry loading after 30 seconds
-                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                        if (adView != null) {
-                            AdRequest retryRequest = new AdRequest.Builder().build();
-                            adView.loadAd(retryRequest);
-                        }
-                    }, 30000);
                 }
 
                 @Override
@@ -139,17 +156,17 @@ public class MainActivity extends BridgeActivity {
         if (adContainer != null && adView != null) {
             if (isLoaded) {
                 adContainer.setVisibility(android.view.View.VISIBLE);
-                // Calculate exact height of the adaptive banner in pixels
+                // Calculate exact total height of the ad container (banner + dynamic navigation bar inset)
                 adContainer.post(() -> {
-                    int bannerHeight = adContainer.getHeight();
-                    if (bannerHeight == 0) {
-                        bannerHeight = (int) (getAdaptiveAdSize().getHeightInPixels(this));
+                    int totalHeight = adContainer.getHeight();
+                    if (totalHeight == 0) {
+                        int bannerPixels = (int) (getAdaptiveAdSize().getHeightInPixels(this));
+                        totalHeight = bannerPixels + adContainer.getPaddingBottom();
                     }
                     if (webView != null) {
-                        // Apply bottom margin/padding to WebView so no UI is covered
                         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) webView.getLayoutParams();
-                        if (lp != null && lp.bottomMargin != bannerHeight) {
-                            lp.bottomMargin = bannerHeight;
+                        if (lp != null && lp.bottomMargin != totalHeight) {
+                            lp.bottomMargin = totalHeight;
                             webView.setLayoutParams(lp);
                         }
                     }

@@ -101,7 +101,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-color);
-            padding-top: calc(env(safe-area-inset-top, 0px) + 2rem);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 1.2rem);
             padding-bottom: 1.2rem;
             padding-left: 1.5rem;
             padding-right: 1.5rem;
@@ -177,12 +177,14 @@
 
         .search-icon {
             position: absolute;
-            left: 0.9rem;
+            left: 0.95rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 1.2rem;
+            stroke: var(--text-muted);
+            width: 1.15rem;
+            height: 1.15rem;
             pointer-events: none;
+            display: block;
         }
 
         /* Tabs Section */
@@ -438,7 +440,7 @@
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
-            .content { padding: 1rem 1rem calc(env(safe-area-inset-bottom, 0px) + 2.5rem) 1rem; }
+            .content { padding: 1rem 1rem 1.5rem 1rem; }
             .surah-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -456,7 +458,10 @@
         </div>
 
         <div class="search-container">
-            <span class="material-symbols-rounded search-icon">search</span>
+            <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
             <input type="text" id="search-input" class="search-input" placeholder="Search Surah by name or number..." autocomplete="off">
         </div>
     </div>
