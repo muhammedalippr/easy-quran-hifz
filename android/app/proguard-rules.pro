@@ -4,6 +4,7 @@
 -keepattributes JavascriptInterface
 
 # Capacitor Core & Plugins
+-keep public class com.easyquranhifz.app.MainActivity { *; }
 -keep public class * extends com.getcapacitor.Plugin {
     public <methods>;
 }
