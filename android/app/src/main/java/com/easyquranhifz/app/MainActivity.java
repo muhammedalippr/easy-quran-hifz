@@ -34,6 +34,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         // Lock to portrait on phones/handheld devices without filtering out tablets, TV, or Car devices in Google Play
         boolean isTablet = (getResources().getConfiguration().screenLayout & android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK) >= android.content.res.Configuration.SCREENLAYOUT_SIZE_LARGE;
         if (!isTablet) {
